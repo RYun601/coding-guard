@@ -16,7 +16,6 @@
 - Python 3.8+
   - macOS/Linux: 需 `python3` 可用
   - Windows: 需 `python` 可用（安装 Python 时勾选 "Add python.exe to PATH"）
-- Node.js（可选，仅 Playwright / Chrome DevTools MCP 需要）
 
 ### Claude Code
 
@@ -44,8 +43,6 @@ codex plugin marketplace add ./coding-guard
 codex plugin add coding-guard@coding-guard-marketplace
 ```
 
-> 注意：插件中的 `.mcp.json` 为 Claude Code 格式。Codex 如需 MCP 服务器请在项目 `.codex/config.toml` 中单独配置。
-
 ## 结构
 
 ```
@@ -65,7 +62,6 @@ coding-guard/                         # marketplace 仓库
       session_context.py              # 项目技术栈感知
     hooks/hooks.claude.json           # Claude Code 专用 Hook 配置
     skills/coding-standards/          # 编码规范速查技能
-    .mcp.json                         # MCP 服务器（Claude Code 格式）
   tests/
     test_coding_guard.py              # 单元测试
 ```
@@ -76,4 +72,4 @@ coding-guard/                         # marketplace 仓库
 
 ## 许可
 
-MIT
+Apache-2.0 license
