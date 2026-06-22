@@ -14,8 +14,8 @@
 ### 前置条件
 
 - Python 3.8+
-  - macOS/Linux: `python3` 默认可用
-  - Windows: 需确保 `python3` 在 PATH 中，或创建 `python3` → `python` 的 shim（如 `doskey python3=python` 或使用 `py -3` 别名）
+  - macOS/Linux: 需 `python3` 可用
+  - Windows: 需 `python` 可用（安装 Python 时勾选 "Add python.exe to PATH"）
 - Node.js（可选，仅 Playwright / Chrome DevTools MCP 需要）
 
 ### Claude Code
