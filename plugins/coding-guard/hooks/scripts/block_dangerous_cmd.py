@@ -1,63 +1,46 @@
 #!/usr/bin/env python3
-"""coding-guard: 拦截可能改变编码的 PowerShell / Bash 写入命令"""
+"""coding-guard: 拦截可能改变编码的写入命令。兼容 Claude Bash/PowerShell 和 Codex"""
 import json, sys, re
+from hook_input import read_stdin, get_command
 
-# 危险命令模式 — 可能改变文件编码的写入方式
-DANGEROUS_PATTERNS = [
-    # PowerShell: Set-Content 写入源码文件
-    r'Set-Content\b.*\.(php|js|ts|jsx|tsx|css|html|py|java|go|sql|json|xml|yml|yaml|md|cs)',
-    # PowerShell: Out-File 写入源码文件
-    r'Out-File\b.*\.(php|js|ts|jsx|tsx|css|html|py|java|go|sql|json|xml|yml|yaml|md|cs)',
-    # .NET: WriteAllText 方法
-    r'\[System\.IO\.File\]::WriteAllText',
-    # Bash/PowerShell: > 重定向到源码文件（排除 git/log 类安全命令）
-    r'>\s*\S+\.(php|js|ts|jsx|tsx|css|py|java|go|sql|json|yml|yaml|md|cs)',
-    # Bash: tee 写入源码文件
-    r'tee\s+.*\.(php|js|ts|jsx|tsx|css|html|py|java|go|sql|json|yml|yaml|md|cs)',
-]
+# 危险特征：同时满足「写文件」+「源码目标」才拦截
+WRITE_ACTIONS = r'Set-Content|Out-File|Add-Content|\[System\.IO\.File\]::Write(?:All(?:Text|Bytes|Lines)?|Lines)|tee\b|>\s*\S|>>\s*\S'
 
-# 安全的命令前缀 — 即使包含 > 也不拦截
-SAFE_COMMANDS = ['git', 'php -l', 'composer', 'npm ', 'npx ', 'node ',
-                 'python', 'phpcs', 'php-cs-fixer', 'prettier', 'eslint']
+SRC_EXT_PAT = r'\.(?:php|js|ts|jsx|tsx|mjs|cjs|mts|cts|css|scss|less|html|vue|svelte|py|java|go|rs|rb|swift|kt|sql|json|xml|yml|yaml|md|cs|c|cpp|h|hpp|ps1|bat|cmd|proto|graphql)$'
 
 
-def is_safe_command(command):
-    """检查命令是否属于安全的白名单"""
-    cmd_stripped = command.strip()
-    for safe in SAFE_COMMANDS:
-        if cmd_stripped.startswith(safe):
-            return True
-    return False
+def has_write_action(command):
+    return bool(re.search(WRITE_ACTIONS, command, re.IGNORECASE))
+
+
+def has_src_target(command):
+    return bool(re.search(SRC_EXT_PAT, command, re.IGNORECASE))
 
 
 def main():
-    raw = sys.stdin.buffer.read().decode('utf-8')
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
+    data = read_stdin()
+    if data is None:
         sys.exit(0)
 
     tool_input = data.get('tool_input', {})
-    command = tool_input.get('command', '')
+    command = get_command(tool_input)
 
-    if not command or is_safe_command(command):
+    if not command:
         sys.exit(0)
 
-    for pattern in DANGEROUS_PATTERNS:
-        if re.search(pattern, command, re.IGNORECASE):
-            print(json.dumps({
-                "hookSpecificOutput": {
-                    "hookEventName": "PreToolUse",
-                    "permissionDecision": "deny",
-                    "permissionDecisionReason": (
-                        "此命令可能改变文件编码或引入 BOM。"
-                        "AGENTS.md 规则禁止使用 Set-Content/Out-File/> /[System.IO.File]::WriteAllText "
-                        "等命令写入源码文件。请使用 Claude Code 的 Edit/Write 工具代替。"
-                    )
-                }
-            }))
-            sys.exit(0)
-
+    # 同时满足「写文件」+「源码目标」才拦截，不再用白名单（白名单过宽会漏）
+    if has_write_action(command) and has_src_target(command):
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": (
+                    "此命令可能改变文件编码或引入 BOM。"
+                    "禁止使用 Set-Content/Out-File/> /tee/[System.IO.File]::WriteAllText "
+                    "等命令写入源码文件。请使用 Edit/Write 工具代替。"
+                )
+            }
+        }))
     sys.exit(0)
 
 

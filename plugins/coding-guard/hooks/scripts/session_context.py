@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""coding-guard: SessionStart 项目感知 — 读取技术栈配置注入上下文"""
+"""coding-guard: SessionStart 项目感知 — 读取配置文件和目录结构推断技术栈"""
 import json, sys, os
 
-# 已知的项目配置文件及其含义
 CONFIG_FILES = {
     'composer.json': 'PHP',
     'package.json': 'Node.js',
@@ -10,6 +9,7 @@ CONFIG_FILES = {
     'go.mod': 'Go',
     'pom.xml': 'Java/Maven',
     'build.gradle': 'Java/Gradle',
+    'build.gradle.kts': 'Java/Gradle',
     'requirements.txt': 'Python',
     'pyproject.toml': 'Python',
     'Gemfile': 'Ruby',
@@ -26,14 +26,13 @@ def read_json(path):
 
 
 def detect_project(cwd):
-    """检测项目技术栈并提取版本约束"""
     info = {'techs': [], 'frameworks': [], 'versions': {}}
 
+    # 配置文件检测
     for config_file, tech in CONFIG_FILES.items():
         full_path = os.path.join(cwd, config_file)
         if not os.path.isfile(full_path):
             continue
-
         info['techs'].append(tech)
 
         if config_file == 'composer.json':
@@ -41,8 +40,7 @@ def detect_project(cwd):
             if data:
                 php_ver = data.get('require', {}).get('php', '')
                 if php_ver:
-                    info['versions']['php'] = str(php_ver).lstrip('^~>=')
-                # 检测框架
+                    info['versions']['php'] = str(php_ver)  # 保留原始约束如 ^7.3|>=7.3
                 require = data.get('require', {})
                 if any('codeigniter' in pkg.lower() for pkg in require):
                     info['frameworks'].append('CodeIgniter')
@@ -51,17 +49,18 @@ def detect_project(cwd):
                 if 'symfony/framework-bundle' in require:
                     info['frameworks'].append('Symfony')
 
-        # 额外：通过目录结构检测 CodeIgniter 3.x（system/ 目录在项目根）
-        if os.path.isdir(os.path.join(cwd, 'system', 'core')):
-            if 'CodeIgniter' not in info['frameworks']:
-                info['frameworks'].append('CodeIgniter')
-
         elif config_file == 'package.json':
             data = read_json(full_path)
             if data:
                 node_ver = data.get('engines', {}).get('node', '')
                 if node_ver:
-                    info['versions']['node'] = str(node_ver).lstrip('^~>=')
+                    info['versions']['node'] = str(node_ver)
+
+    # 目录结构检测（独立于配置文件循环，覆盖无 composer.json 的 CI 3 项目）
+    if os.path.isdir(os.path.join(cwd, 'system', 'core')):
+        if 'CodeIgniter' not in info['frameworks']:
+            info['frameworks'].append('CodeIgniter')
+
     return info
 
 
@@ -75,26 +74,22 @@ def main():
     cwd = data.get('cwd', '')
     project_info = detect_project(cwd)
 
-    if not project_info['techs']:
-        sys.exit(0)  # 没有检测到已知项目类型
+    if not project_info['techs'] and not project_info['frameworks']:
+        sys.exit(0)
 
-    # 构建上下文消息
     lines = [f"[coding-guard] 检测到项目技术栈:"]
-    lines.append(f"  语言/运行时: {', '.join(project_info['techs'])}")
-
+    if project_info['techs']:
+        lines.append(f"  语言/运行时: {', '.join(project_info['techs'])}")
     if project_info['frameworks']:
         lines.append(f"  框架: {', '.join(project_info['frameworks'])}")
-
     if project_info['versions']:
         for k, v in project_info['versions'].items():
             lines.append(f"  {k} 版本约束: {v}")
 
-    context_msg = '\n'.join(lines)
-
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "SessionStart",
-            "additionalContext": context_msg
+            "additionalContext": '\n'.join(lines)
         }
     }))
     sys.exit(0)
