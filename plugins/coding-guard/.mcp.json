@@ -1,0 +1,10 @@
+{
+  "playwright": {
+    "command": "npx",
+    "args": ["@playwright/mcp", "--headless", "--caps=vision", "--isolated"]
+  },
+  "chrome-devtools": {
+    "command": "npx",
+    "args": ["-y", "@anthropic/mcp-server-chrome-devtools"]
+  }
+}

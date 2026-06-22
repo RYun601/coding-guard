@@ -1,0 +1,13 @@
+{
+  "plugins": [
+    {
+      "name": "coding-guard",
+      "description": "通用编码安全守护：UTF-8 BOM 检测与拦截、PowerShell 危险写入命令拦截、硬编码凭据扫描、项目技术栈自动感知",
+      "version": "1.0.0",
+      "author": { "name": "ranyun" },
+      "source": "./plugins/coding-guard",
+      "keywords": ["coding-standards", "security", "encoding", "bom", "utf8"],
+      "category": "development"
+    }
+  ]
+}

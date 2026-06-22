@@ -1,0 +1,10 @@
+{
+  "name": "coding-guard",
+  "version": "1.0.0",
+  "description": "通用编码安全守护：UTF-8 BOM 检测与拦截、PowerShell 危险写入命令拦截、硬编码凭据扫描、项目技术栈自动感知。支持 Claude Code 和 Codex",
+  "author": { "name": "ranyun" },
+  "license": "MIT",
+  "keywords": ["coding-standards", "security", "encoding", "bom", "utf8", "secrets"],
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}
