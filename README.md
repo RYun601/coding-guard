@@ -23,32 +23,26 @@
 #### 方式一：通过 marketplace 安装
 
 ```bash
-# 注册 marketplace
-claude plugin marketplace add <repo-path>
-# 安装插件
+git clone https://github.com/RYun601/coding-guard.git
+claude plugin marketplace add ./coding-guard
 /plugin install coding-guard@coding-guard-marketplace
 ```
 
 #### 方式二：开发模式
 
 ```bash
-claude --plugin-dir <repo-path>/plugins/coding-guard
+claude --plugin-dir ./coding-guard/plugins/coding-guard
 ```
 
 ### Codex
 
 #### 方式一：marketplace
 
-注册 marketplace 后安装：
-
 ```bash
-codex plugin marketplace add <repo-path>
+git clone https://github.com/RYun601/coding-guard.git
+codex plugin marketplace add ./coding-guard
 codex plugin add coding-guard@coding-guard-marketplace
 ```
-
-#### 方式二：开发模式（Codex）
-
-将插件目录加入 Codex 扩展路径（具体命令取决于 Codex 版本，参考 `codex plugin --help`）。
 
 > 注意：插件中的 `.mcp.json` 为 Claude Code 格式。Codex 如需 MCP 服务器请在项目 `.codex/config.toml` 中单独配置。
 
@@ -78,13 +72,7 @@ coding-guard/                         # marketplace 仓库
 
 ## 跨平台兼容性
 
-| 平台 | Python 命令 | 已验证 |
-|------|------------|--------|
-| Windows | `python3`（需确保可用） | 脚本语法通过 |
-| macOS | `python3` | 脚本语法通过 |
-| Linux | `python3` | 脚本语法通过 |
-
-所有 Python 脚本使用 `os.path.join`、无硬编码路径、无平台分支代码。
+支持 macOS、Linux、Windows。
 
 ## 许可
 
