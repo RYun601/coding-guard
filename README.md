@@ -6,26 +6,27 @@
 
 - **UTF-8 BOM 检测**: 在 Edit/Write/apply_patch 写入源码文件前拦截 BOM 头，写入后验证文件编码
 - **危险命令拦截**: 阻止 `Set-Content`/`Out-File`/`>`/`>>`/`tee`/`WriteAllText` 等可能改变编码的写入方式
-- **硬编码凭据扫描**: 正则扫描 `password=`/`secret=`/`api_key=`/`token=` 等模式，拦截明文凭据
+- **硬编码凭据扫描**: 正则扫描 `password=`/`secret=`/`api_key=`/`token=`/`jdbc:` 及 `mysql_connect`/`mysqli_connect`/`new PDO` 硬编码密码，拦截明文凭据
 - **项目技术栈感知**: SessionStart 读取 `composer.json`/`package.json` 和目录结构自动注入框架和版本信息
 
 ## 安装
 
 ### 前置条件
 
-- Python 3.6+
+- Python 3.8+
   - macOS/Linux: `python3` 默认可用
   - Windows: 需确保 `python3` 在 PATH 中，或创建 `python3` → `python` 的 shim（如 `doskey python3=python` 或使用 `py -3` 别名）
-- Node.js（Playwright 和 Chrome DevTools MCP 需要 `npx`）
+- Node.js（可选，仅 Playwright / Chrome DevTools MCP 需要）
 
 ### Claude Code
 
-#### 方式一：本地 marketplace
+#### 方式一：通过 marketplace 安装
 
-已注册 `coding-guard-local` marketplace（`~/.claude/settings.json` → `extraKnownMarketplaces`），执行：
-
-```text
-/plugin install coding-guard@coding-guard-local
+```bash
+# 注册 marketplace
+claude plugin marketplace add <repo-path>
+# 安装插件
+/plugin install coding-guard@coding-guard-marketplace
 ```
 
 #### 方式二：开发模式
@@ -71,6 +72,8 @@ coding-guard/                         # marketplace 仓库
     hooks/hooks.claude.json           # Claude Code 专用 Hook 配置
     skills/coding-standards/          # 编码规范速查技能
     .mcp.json                         # MCP 服务器（Claude Code 格式）
+  tests/
+    test_coding_guard.py              # 单元测试
 ```
 
 ## 跨平台兼容性
