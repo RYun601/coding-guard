@@ -1,15 +1,20 @@
 {
   "name": "coding-guard-marketplace",
-  "owner": { "name": "ranyun" },
+  "interface": {
+    "displayName": "Coding Guard"
+  },
   "plugins": [
     {
       "name": "coding-guard",
-      "description": "通用编码安全守护：UTF-8 BOM 检测与拦截、危险写入命令拦截、硬编码凭据扫描、项目技术栈自动感知",
-      "version": "1.0.0",
-      "author": { "name": "ranyun" },
-      "source": "./plugins/coding-guard",
-      "keywords": ["coding-standards", "security", "encoding", "bom", "utf8"],
-      "category": "development"
+      "source": {
+        "source": "local",
+        "path": "./plugins/coding-guard"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
     }
   ]
 }

@@ -63,10 +63,12 @@ coding-guard/                         # marketplace 仓库
     hooks/hooks.json                  # Hook 配置（PascalCase matcher，兼容双平台）
     hooks/scripts/                    # Python hook 脚本（跨平台）
       hook_input.py                   # 共享输入适配层
+      run_hook.py                     # Hook 启动器
       check_bom.py                    # BOM 检测
       check_secrets.py                # 凭据扫描
       block_dangerous_cmd.py          # 危险命令拦截
       session_context.py              # 项目技术栈感知
+    hooks/hooks.claude.json           # Claude Code 专用 Hook 配置
     skills/coding-standards/          # 编码规范速查技能
     .mcp.json                         # MCP 服务器（Claude Code 格式）
 ```

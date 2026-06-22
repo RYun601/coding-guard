@@ -1,25 +1,51 @@
 #!/usr/bin/env python3
 """coding-guard: 拦截可能改变编码的写入命令。兼容 Claude Bash/PowerShell 和 Codex"""
 import json, sys, re
-from hook_input import read_stdin, get_command
+from hook_input import read_stdin, get_command, is_src_file
 
 # 危险特征：同时满足「写文件」+「源码目标」才拦截
 WRITE_ACTIONS = r'Set-Content|Out-File|Add-Content|\[System\.IO\.File\]::Write(?:All(?:Text|Bytes|Lines)?|Lines)|tee\b|>\s*\S|>>\s*\S'
 
-SRC_EXT_PAT = r'\.(?:php|js|ts|jsx|tsx|mjs|cjs|mts|cts|css|scss|less|html|vue|svelte|py|java|go|rs|rb|swift|kt|sql|json|xml|yml|yaml|md|cs|c|cpp|h|hpp|ps1|bat|cmd|proto|graphql)$'
+REDIRECT_TARGET_RE = re.compile(r'(?:^|[^>])>{1,2}\s*(?P<target>"[^"]+"|\'[^\']+\'|\S+)', re.IGNORECASE)
+POWERSHELL_TARGET_RE = re.compile(
+    r'\b(?:Set-Content|Out-File|Add-Content)\b(?:\s+-[A-Za-z]+\s+(?:"[^"]+"|\'[^\']+\'|\S+))*\s+(?P<target>"[^"]+"|\'[^\']+\'|\S+)',
+    re.IGNORECASE,
+)
+TEE_TARGET_RE = re.compile(
+    r'\btee\b(?:\s+-[A-Za-z]+\s+(?:"[^"]+"|\'[^\']+\'|\S+))*\s+(?P<target>"[^"]+"|\'[^\']+\'|\S+)',
+    re.IGNORECASE,
+)
+DOTNET_WRITE_TARGET_RE = re.compile(
+    r'\[System\.IO\.File\]::Write(?:All(?:Text|Bytes|Lines)?|Lines)\s*\(\s*(?P<target>"[^"]+"|\'[^\']+\')',
+    re.IGNORECASE,
+)
 
 
 def has_write_action(command):
     return bool(re.search(WRITE_ACTIONS, command, re.IGNORECASE))
 
 
+def clean_target(raw_target):
+    target = raw_target.strip().strip('\'"')
+    while target.startswith('&') or target.startswith('>'):
+        target = target[1:].strip().strip('\'"')
+    return target
+
+
+def iter_write_targets(command):
+    for pattern in (REDIRECT_TARGET_RE, POWERSHELL_TARGET_RE, TEE_TARGET_RE, DOTNET_WRITE_TARGET_RE):
+        for match in pattern.finditer(command):
+            yield clean_target(match.group('target'))
+
+
 def has_src_target(command):
-    return bool(re.search(SRC_EXT_PAT, command, re.IGNORECASE))
+    return any(is_src_file(target) for target in iter_write_targets(command))
 
 
 def main():
     data = read_stdin()
     if data is None:
+        print(json.dumps({"systemMessage": "危险命令检查脚本无法解析输入 JSON"}))
         sys.exit(0)
 
     tool_input = data.get('tool_input', {})

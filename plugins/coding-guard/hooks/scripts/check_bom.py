@@ -7,10 +7,15 @@ BOM = b'\xef\xbb\xbf'
 
 
 def check_content_for_bom(content):
-    if content and content.encode('utf-8').startswith(BOM):
+    if not content:
+        return False
+    if content.encode('utf-8').startswith(BOM):
         return True
-    if content and ord(content[0]) == 0xFEFF:
+    if content[0] == '\ufeff':
         return True
+    for line in content.splitlines():
+        if line.startswith('+') and len(line) > 1 and line[1] == '\ufeff':
+            return True
     return False
 
 

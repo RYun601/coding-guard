@@ -5,6 +5,6 @@
   "author": { "name": "ranyun" },
   "license": "MIT",
   "keywords": ["coding-standards", "security", "encoding", "bom", "utf8", "secrets"],
-  "hooks": "./hooks/hooks.json",
+  "hooks": "./hooks/hooks.claude.json",
   "mcpServers": "./.mcp.json"
 }

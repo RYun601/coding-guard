@@ -5,5 +5,18 @@
   "author": { "name": "ranyun" },
   "license": "MIT",
   "keywords": ["coding-standards", "security", "encoding", "bom", "utf8"],
-  "interface": {}
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Coding Guard",
+    "shortDescription": "Guard source edits against BOM, unsafe writes, and hardcoded secrets.",
+    "longDescription": "Coding Guard packages coding standards and lifecycle hooks that keep source files UTF-8 without BOM, block encoding-risky shell writes, scan edits for hardcoded credentials, and surface project stack context.",
+    "developerName": "ranyun",
+    "category": "Productivity",
+    "defaultPrompt": [
+      "Review this repo for encoding and secret risks.",
+      "Help me edit files without introducing BOM.",
+      "Check whether this change violates coding guard rules."
+    ],
+    "capabilities": ["Skills", "Lifecycle hooks", "Security checks"]
+  }
 }

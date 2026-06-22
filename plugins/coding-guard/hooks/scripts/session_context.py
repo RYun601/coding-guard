@@ -69,6 +69,7 @@ def main():
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
+        print(json.dumps({"systemMessage": "项目感知脚本无法解析输入 JSON"}))
         sys.exit(0)
 
     cwd = data.get('cwd', '')

@@ -1,5 +1,6 @@
 {
   "name": "coding-guard-marketplace",
+  "description": "Coding Guard marketplace for encoding, secret, and safe-write guardrails.",
   "owner": { "name": "ranyun" },
   "plugins": [
     {

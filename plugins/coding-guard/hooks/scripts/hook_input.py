@@ -25,7 +25,8 @@ def get_content(tool_input):
     """从 tool_input 中提取待写入内容（兼容多种字段名）"""
     # Claude: content / new_string
     # Codex apply_patch: patch / text / content / new_string / new_str
-    for key in ('content', 'new_string', 'patch', 'text', 'new_str'):
+    # Some hook payloads carry patch text only in command/cmd fields.
+    for key in ('content', 'new_string', 'patch', 'text', 'new_str', 'command', 'cmd', 'shell_command'):
         val = tool_input.get(key, '')
         if val:
             return val
@@ -54,9 +55,9 @@ def is_src_file(filepath):
                 '.ps1', '.bat', '.cmd',
                 '.proto', '.graphql', '.gql',
                 '.csproj', '.gradle',
-                '.env.example', '.env'}
+                '.env.example'}
     # 对于无扩展名文件，匹配完整文件名
-    BASENAMES = {'Dockerfile', 'Makefile', '.env.example', '.env',
+    BASENAMES = {'Dockerfile', 'Makefile', '.env.example',
                  'Gemfile', 'Rakefile', 'Vagrantfile'}
     basename = os.path.basename(filepath) if filepath else ''
     if basename in BASENAMES:

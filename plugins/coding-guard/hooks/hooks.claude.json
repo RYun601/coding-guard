@@ -1,5 +1,5 @@
 {
-  "description": "编码安全守护 — BOM 检测与拦截、危险写入命令拦截、硬编码凭据扫描、项目技术栈感知（Codex）",
+  "description": "编码安全守护 — BOM 检测与拦截、危险写入命令拦截、硬编码凭据扫描、项目技术栈感知（Claude Code）",
   "hooks": {
     "PreToolUse": [
       {

@@ -10,7 +10,7 @@ SECRET_PATTERNS = [
     r'(?:auth[_-]?token|access[_-]?token|bearer[_-]?token)\s*[:=]\s*[\'"][^\'"]{8,}[\'"]',
     r'Authorization\s*:\s*(?:Bearer|Basic)\s+[\'"][^\'"]{16,}[\'"]',
     r'jdbc:.*password=',
-    r'(?:mysql_connect|mysqli_connect|new\s+PDO)\s*\([^)]*[\'"]\s*,\s*[\'"][^\'"]{3,}[\'"]',
+    r'(?:mysql_connect|mysqli_connect|new\s+PDO)\s*\(\s*[\'"][^\'"]*[\'"]\s*,\s*[\'"][^\'"]*[\'"]\s*,\s*[\'"][^\'"]{3,}[\'"]',
 ]
 
 EXCLUDE_PATTERNS = [
@@ -38,6 +38,7 @@ def check_content(content):
 def main():
     data = read_stdin()
     if data is None:
+        print(json.dumps({"systemMessage": "凭据检查脚本无法解析输入 JSON"}))
         sys.exit(0)
 
     tool_input = data.get('tool_input', {})
